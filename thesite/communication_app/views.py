@@ -95,12 +95,10 @@ def update(request, pet_id):
     #
     # If there is a match, we continue. Else, we raise 403.
     cursor = django.db.connection.cursor()
-    sql_query = '''SELECT * from communication_app_pet WHERE id=%s AND user_id=%d''' % (
-        pet_id,
-        request.user.pk,
-    )
-    cursor.execute(sql_query)
+    cursor.execute('SELECT * from communication_app_pet WHERE id=%s and user_id=%s', (pet_id, request.user.pk))
     results = cursor.fetchall()
+    cursor.close()
+
     if not results:
         return HttpResponse(status=403)
 
