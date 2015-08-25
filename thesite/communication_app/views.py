@@ -1,4 +1,5 @@
 import re
+import bleach
 
 from django.core.urlresolvers import reverse
 import django.db
@@ -142,7 +143,7 @@ def set_description(request, pet_id):
     pet = get_object_or_404(communication_app.models.Pet, pk=pet_id)
 
     # If they gave us no description, reject.
-    raw_user_provided_description =  request.POST.get('description', None)
+    raw_user_provided_description = request.POST.get('description', None)
     if raw_user_provided_description is None:
         return HttpResponse(status=403)
 
@@ -157,6 +158,7 @@ def set_description(request, pet_id):
     except UnicodeDecodeError:
         return HttpResponse(status=403)
 
+    user_provided_description = bleach.clean(user_provided_description)
     # Seems good. Let's store it.
     pet.description = user_provided_description
     pet.save()
@@ -164,7 +166,6 @@ def set_description(request, pet_id):
     # Redirect them back to the profile for this pet.
     return HttpResponseRedirect('/pets/profiles/%d' % (
         pet.id,))
-
 
 
 @csrf_exempt
